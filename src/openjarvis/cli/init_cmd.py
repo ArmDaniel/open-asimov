@@ -173,7 +173,7 @@ def _next_steps_text(engine: str, model: str = "") -> str:
             "  Run `jarvis doctor` to verify your setup."
         ),
     }
-    return steps.get(engine, steps["ollama"])
+    return steps.get(engine, steps["llamacpp"])
 
 
 def _quick_privacy_check(console: Console) -> None:

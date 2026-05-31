@@ -2,7 +2,7 @@
 
 Walks the user through connecting local data sources (Apple Notes, iMessage,
 Obsidian), ingesting them into a shared KnowledgeStore, and launching an
-interactive Deep Research chat session with Qwen3.5 via Ollama.
+interactive Deep Research chat session with Qwen3.5 via llama.cpp.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ _DEFAULT_NOTES_DB = (
 
 _DEFAULT_IMESSAGE_DB = Path.home() / "Library" / "Messages" / "chat.db"
 
-_OLLAMA_MODEL = "qwen3.5:4b"
+_LOCAL_MODEL = "qwen3.5:4b"
 
 # ---------------------------------------------------------------------------
 # Detection
@@ -279,7 +279,7 @@ def _launch_chat(store: KnowledgeStore, console: Console) -> None:
     """Start an interactive Deep Research chat session."""
     from openjarvis.agents.deep_research import DeepResearchAgent
     from openjarvis.connectors.retriever import TwoStageRetriever
-    from openjarvis.engine.ollama import OllamaEngine
+    from openjarvis.engine.openai_compat_engines import LlamaCppEngine
     from openjarvis.tools.knowledge_search import KnowledgeSearchTool
     from openjarvis.tools.knowledge_sql import KnowledgeSQLTool
     from openjarvis.tools.scan_chunks import ScanChunksTool
@@ -288,21 +288,23 @@ def _launch_chat(store: KnowledgeStore, console: Console) -> None:
     console.print("\n[bold]Setting up Deep Research agent...[/bold]")
 
     # Engine
-    engine = OllamaEngine()
+    engine = LlamaCppEngine()
     if not engine.health():
         console.print(
-            "[red]Ollama is not running.[/red] Start it with: [bold]ollama serve[/bold]"
+            "[red]llama.cpp is not running.[/red] "
+            "Start it with: [bold]llama-server -m <gguf>[/bold]"
         )
         return
 
     models = engine.list_models()
-    if _OLLAMA_MODEL not in models and f"{_OLLAMA_MODEL}:latest" not in models:
-        base_name = _OLLAMA_MODEL.split(":")[0]
+    if _LOCAL_MODEL not in models and f"{_LOCAL_MODEL}:latest" not in models:
+        base_name = _LOCAL_MODEL.split(":")[0]
         matching = [m for m in models if m.startswith(base_name)]
         if not matching:
             console.print(
-                f"[yellow]Model {_OLLAMA_MODEL} not found.[/yellow] "
-                f"Pull it with: [bold]ollama pull {_OLLAMA_MODEL}[/bold]"
+                f"[yellow]Model {_LOCAL_MODEL} not found.[/yellow] "
+                "Download it with: [bold]jarvis model pull "
+                f"{_LOCAL_MODEL} --engine llamacpp[/bold]"
             )
             return
 
@@ -311,20 +313,20 @@ def _launch_chat(store: KnowledgeStore, console: Console) -> None:
     tools = [
         KnowledgeSearchTool(retriever=retriever),
         KnowledgeSQLTool(store=store),
-        ScanChunksTool(store=store, engine=engine, model=_OLLAMA_MODEL),
+        ScanChunksTool(store=store, engine=engine, model=_LOCAL_MODEL),
         ThinkTool(),
     ]
 
     # Agent
     agent = DeepResearchAgent(
         engine=engine,
-        model=_OLLAMA_MODEL,
+        model=_LOCAL_MODEL,
         tools=tools,
         interactive=True,
     )
 
     console.print(
-        f"[green]Ready![/green] Using [bold]{_OLLAMA_MODEL}[/bold] via Ollama.\n"
+        f"[green]Ready![/green] Using [bold]{_LOCAL_MODEL}[/bold] via llama.cpp.\n"
         "Tools: knowledge_search, knowledge_sql, scan_chunks, think\n"
         "Type your research question. Type [bold]/quit[/bold] to exit.\n"
     )

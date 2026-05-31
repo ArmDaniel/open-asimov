@@ -2,7 +2,7 @@
 
 Reads API keys from ~/.openjarvis/cloud-keys.env at request time so
 it works even when the server was started without cloud keys in its
-environment.  Uses httpx directly so no cloud SDK packages are required.
+environment. Uses httpx directly so no cloud SDK packages are required.
 """
 
 from __future__ import annotations
@@ -279,12 +279,22 @@ async def _stream_google(
 
 
 # ---------------------------------------------------------------------------
-# Local (Ollama) direct streaming — bypasses engine routing entirely
+# Local direct streaming — bypasses engine routing entirely
 # ---------------------------------------------------------------------------
 
 
-def _ollama_host() -> str:
-    return os.environ.get("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+def _configured_local_engine():
+    from openjarvis.core.config import load_config
+    from openjarvis.engine.ollama import OllamaEngine
+    from openjarvis.engine.openai_compat_engines import LlamaCppEngine
+
+    cfg = load_config()
+    if cfg.engine.default == "ollama":
+        host = cfg.engine.ollama.host or os.environ.get("OLLAMA_HOST")
+        return OllamaEngine(host=host) if host else OllamaEngine()
+
+    host = cfg.engine.llamacpp.host or os.environ.get("LLAMACPP_HOST")
+    return LlamaCppEngine(host=host) if host else LlamaCppEngine()
 
 
 async def stream_local(
@@ -293,46 +303,21 @@ async def stream_local(
     temperature: float = 0.7,
     max_tokens: int = 1024,
 ) -> AsyncIterator[str]:
-    """Stream tokens directly from Ollama, bypassing the engine system."""
-    payload = {
-        "model": model,
-        "messages": _to_openai_msgs(messages),
-        "stream": True,
-        # Disable extended thinking (Qwen3.5 etc.) — when enabled all tokens
-        # go into the 'thinking' field and 'content' stays empty.
-        "think": False,
-        "options": {
-            "temperature": temperature,
-            "num_predict": max_tokens,
-        },
-    }
-    host = _ollama_host()
-    async with httpx.AsyncClient(timeout=300) as client:
-        async with client.stream("POST", f"{host}/api/chat", json=payload) as resp:
-            resp.raise_for_status()
-            async for line in resp.aiter_lines():
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    token = data.get("message", {}).get("content", "")
-                    if token:
-                        yield token
-                    if data.get("done"):
-                        break
-                except Exception:
-                    pass
+    """Stream tokens directly from the configured local engine."""
+    engine = _configured_local_engine()
+    async for token in engine.stream(
+        messages,
+        model=model,
+        temperature=temperature,
+        max_tokens=max_tokens,
+    ):
+        yield token
 
 
 async def list_local_models() -> list[str]:
-    """Return Ollama model names directly from the Ollama API."""
-    host = _ollama_host()
+    """Return model names directly from the configured local engine."""
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(f"{host}/api/tags")
-            resp.raise_for_status()
-            data = resp.json()
-            return [m["name"] for m in data.get("models", [])]
+        return _configured_local_engine().list_models()
     except Exception:
         return []
 

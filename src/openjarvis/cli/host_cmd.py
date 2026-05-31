@@ -120,14 +120,14 @@ def _detect_backend() -> str | None:
                 return "mlx"
         except FileNotFoundError:
             pass
-        return "ollama"
+        return "llamacpp"
 
     if system == "linux":
         if shutil.which("nvidia-smi"):
             return "vllm"
-        return "ollama"
+        return "llamacpp"
 
-    return "ollama"
+    return "llamacpp"
 
 
 def _install_backend(backend: str, console: Console) -> bool:
@@ -174,7 +174,7 @@ def _install_backend(backend: str, console: Console) -> bool:
 
 
 def _install_binary_backend(backend: str, console: Console) -> bool:
-    """Guide the user through installing a binary backend (Ollama, llama.cpp)."""
+    """Guide the user through installing a binary backend (llama.cpp, Ollama)."""
     info = _BACKENDS[backend]
     binary = info["binary"]
 

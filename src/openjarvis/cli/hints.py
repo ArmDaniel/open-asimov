@@ -17,7 +17,7 @@ def hint_no_config() -> str:
 
 def hint_no_engine(engine_name: Optional[str] = None) -> str:
     """Return a suggestion when the inference engine is unreachable."""
-    name = engine_name or "ollama"
+    name = engine_name or "llamacpp"
     return (
         f"[yellow]Hint:[/yellow] Engine '{name}' is not reachable.\n"
         f"  Make sure the {name} server is running.\n"
@@ -26,7 +26,7 @@ def hint_no_engine(engine_name: Optional[str] = None) -> str:
         "\n"
         "  [dim]To use a remote engine:[/dim]\n"
         f"    [cyan]jarvis config set engine.{name}.host http://<remote-ip>:<port>[/cyan]\n"
-        f"    [dim]or[/dim] [cyan]export OLLAMA_HOST=http://<remote-ip>:11434[/cyan]"
+        f"    [dim]or[/dim] [cyan]export {name.upper()}_HOST=http://<remote-ip>:<port>[/cyan]"
     )
 
 
@@ -35,12 +35,13 @@ def hint_no_model(model_name: Optional[str] = None) -> str:
     if model_name:
         return (
             f"[yellow]Hint:[/yellow] Model '{model_name}' not found.\n"
-            f"  Try: [bold]ollama pull {model_name}[/bold]\n"
+            f"  Try: [bold]jarvis model pull {model_name} --engine llamacpp[/bold]\n"
             "  Run [bold]jarvis model list[/bold] to see available models."
         )
     return (
         "[yellow]Hint:[/yellow] No models available.\n"
-        "  Pull a model first: [bold]ollama pull qwen3.5:2b[/bold]\n"
+        "  Pull a model first: [bold]jarvis model pull "
+        "qwen3.5:2b --engine llamacpp[/bold]\n"
         "  Run [bold]jarvis model list[/bold] to see available models."
     )
 

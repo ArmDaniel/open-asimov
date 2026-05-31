@@ -40,7 +40,7 @@ from openjarvis.connectors.hybrid_search import HybridSearch
 from openjarvis.connectors.store import KnowledgeStore
 from openjarvis.core.config import DEFAULT_CONFIG_DIR
 from openjarvis.core.types import TelemetryRecord
-from openjarvis.engine.ollama import OllamaEngine
+from openjarvis.engine.openai_compat_engines import LlamaCppEngine
 from openjarvis.telemetry.store import TelemetryStore
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ def _record_research_telemetry(
         rec = TelemetryRecord(
             timestamp=time.time(),
             model_id=model,
-            engine="ollama",
+            engine="llamacpp",
             agent="research",
             prompt_tokens=int(usage.get("prompt_tokens", 0)),
             prompt_tokens_evaluated=int(usage.get("prompt_tokens", 0)),
@@ -298,7 +298,7 @@ async def _stream_research(query: str, model: str) -> AsyncGenerator[str, None]:
     ``{"type": "done", "usage": {...}}``. The client can rely on always
     seeing a ``done`` frame, even when the agent never started.
     """
-    # Phase 1: setup. Failures here (Ollama daemon down, DB locked, etc.)
+    # Phase 1: setup. Failures here (llama.cpp down, DB locked, etc.)
     # yield error + done and return — nothing has been emitted yet so the
     # client gets a clean two-frame stream instead of a dangling connection.
     try:
@@ -320,7 +320,7 @@ async def _stream_research(query: str, model: str) -> AsyncGenerator[str, None]:
             )
             embedder = None
 
-        engine = OllamaEngine()
+        engine = LlamaCppEngine()
         agent = ResearchAgent(
             engine=engine,
             search=HybridSearch(store, embedder),

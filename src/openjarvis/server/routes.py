@@ -145,7 +145,13 @@ async def chat_completions(request_body: ChatCompletionRequest, request: Request
         # directly from the engine for true token-by-token output.
         if agent is not None and bus is not None and request_body.tools:
             return await _handle_agent_stream(agent, bus, model, request_body)
-        return await _handle_stream(engine, model, request_body, complexity_info)
+        return await _handle_stream(
+            engine,
+            model,
+            request_body,
+            complexity_info,
+            getattr(request.app.state, "engine_name", ""),
+        )
 
     # Non-streaming: use agent if available, otherwise direct engine call
     if agent is not None:
@@ -303,6 +309,7 @@ async def _handle_stream(
     model: str,
     req: ChatCompletionRequest,
     complexity_info=None,
+    engine_name: str = "",
 ):
     """Stream response using SSE format."""
     from openjarvis.server.cloud_router import (
@@ -426,7 +433,10 @@ async def _handle_stream(
         # We use the routing decision (use_cloud) directly rather than
         # unwrapping the engine chain, which can be in a broken state.
         finish_dict.setdefault("telemetry", {})
-        finish_dict["telemetry"]["engine"] = "cloud" if use_cloud else "ollama"
+        local_engine_name = engine_name or getattr(engine, "engine_id", "local")
+        finish_dict["telemetry"]["engine"] = (
+            "cloud" if use_cloud else local_engine_name
+        )
 
         if complexity_info is not None:
             finish_dict["complexity"] = complexity_info.model_dump()
@@ -443,7 +453,7 @@ async def _handle_stream(
 
 @router.get("/v1/models")
 async def list_models(request: Request) -> ModelListResponse:
-    """List locally installed models (Ollama).
+    """List locally installed models from the configured local backend.
 
     Cloud models are not included here — they live in the Cloud Models tab
     of the UI and are selected there, not from this endpoint.
@@ -452,7 +462,7 @@ async def list_models(request: Request) -> ModelListResponse:
 
     # Prefer engine.list_models() so mock engines work in tests.
     # Filter out any cloud model IDs that may appear via MultiEngine.
-    # Fall back to direct Ollama query only when the engine returns nothing.
+    # Fall back to a direct local backend query only when the engine returns nothing.
     engine = request.app.state.engine
     all_ids = engine.list_models()
     model_ids = [m for m in all_ids if not is_cloud_model(m)]

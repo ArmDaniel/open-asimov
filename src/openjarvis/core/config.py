@@ -245,11 +245,11 @@ def recommend_engine(hw: HardwareInfo) -> str:
     if gpu.vendor == "apple":
         return "mlx"
     if gpu.vendor == "nvidia":
-        # Datacenter cards (A100, H100, L40, etc.) → vllm; consumer → ollama
+        # Datacenter cards (A100, H100, L40, etc.) → vllm; consumer → llama.cpp
         datacenter_keywords = ("A100", "H100", "H200", "L40", "A10", "A30")
         if any(kw in gpu.name for kw in datacenter_keywords):
             return "vllm"
-        return "ollama"
+        return "llamacpp"
     if gpu.vendor == "amd":
         # Datacenter cards (MI300, MI325, MI350, MI355) → vllm; consumer → lemonade
         amd_datacenter_keywords = ("MI300", "MI325", "MI350", "MI355")
@@ -432,7 +432,7 @@ class LemonadeEngineConfig:
 class EngineConfig:
     """Inference engine settings with nested per-engine configs."""
 
-    default: str = "ollama"
+    default: str = "llamacpp"
     ollama: OllamaEngineConfig = field(default_factory=OllamaEngineConfig)
     vllm: VLLMEngineConfig = field(default_factory=VLLMEngineConfig)
     sglang: SGLangEngineConfig = field(default_factory=SGLangEngineConfig)
@@ -1865,7 +1865,7 @@ def generate_minimal_toml(
             f"# set to remote URL if engine runs elsewhere\n"
         )
     return f"""\
-# OpenJarvis configuration
+# open-asimov configuration
 # Hardware: {hw.cpu_brand} ({hw.cpu_count} cores, {hw.ram_gb} GB RAM){gpu_comment}
 # Full reference config: jarvis init --full
 

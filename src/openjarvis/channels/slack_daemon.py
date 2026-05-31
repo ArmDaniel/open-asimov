@@ -49,7 +49,7 @@ def run_slack_daemon(
     from slack_bolt.adapter.socket_mode import SocketModeHandler
 
     from openjarvis.agents.deep_research import DeepResearchAgent
-    from openjarvis.engine.ollama import OllamaEngine
+    from openjarvis.engine.openai_compat_engines import LlamaCppEngine
     from openjarvis.server.agent_manager_routes import (
         _build_deep_research_tools,
     )
@@ -60,7 +60,7 @@ def run_slack_daemon(
     pid_path.write_text(str(os.getpid()))
 
     # Build agent
-    engine = OllamaEngine()
+    engine = LlamaCppEngine()
     tools = _build_deep_research_tools(engine=engine, model=model)
     agent = DeepResearchAgent(
         engine=engine,

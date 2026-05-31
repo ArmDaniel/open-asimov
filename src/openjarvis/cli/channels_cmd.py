@@ -102,7 +102,7 @@ def imessage_start(
             TwoStageRetriever,
         )
         from openjarvis.connectors.store import KnowledgeStore
-        from openjarvis.engine.ollama import OllamaEngine
+        from openjarvis.engine.openai_compat_engines import LlamaCppEngine
         from openjarvis.tools.knowledge_search import (
             KnowledgeSearchTool,
         )
@@ -112,7 +112,7 @@ def imessage_start(
         from openjarvis.tools.scan_chunks import ScanChunksTool
         from openjarvis.tools.think import ThinkTool
 
-        engine = OllamaEngine()
+        engine = LlamaCppEngine()
         store = KnowledgeStore()
         retriever = TwoStageRetriever(store)
         tools = [

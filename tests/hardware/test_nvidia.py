@@ -149,7 +149,7 @@ class TestNVIDIAEngineRecommendation:
                 count=1,
             ),
         )
-        assert recommend_engine(hw) == "ollama"
+        assert recommend_engine(hw) == "llamacpp"
 
     def test_rtx_4090_recommends_ollama(self):
         hw = HardwareInfo(
@@ -164,7 +164,7 @@ class TestNVIDIAEngineRecommendation:
                 count=1,
             ),
         )
-        assert recommend_engine(hw) == "ollama"
+        assert recommend_engine(hw) == "llamacpp"
 
     def test_multi_gpu_config(self):
         """Multi-GPU datacenter setup still recommends vllm."""

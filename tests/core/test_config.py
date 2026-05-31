@@ -26,7 +26,7 @@ from openjarvis.core.config import (
 class TestDefaults:
     def test_jarvis_config_defaults(self) -> None:
         cfg = JarvisConfig()
-        assert cfg.engine.default == "ollama"
+        assert cfg.engine.default == "llamacpp"
         assert cfg.memory.default_backend == "sqlite"
         assert cfg.telemetry.enabled is True
 
@@ -69,7 +69,7 @@ class TestRecommendEngine:
             platform="linux",
             gpu=GpuInfo(vendor="nvidia", name="NVIDIA GeForce RTX 4090", vram_gb=24),
         )
-        assert recommend_engine(hw) == "ollama"
+        assert recommend_engine(hw) == "llamacpp"
 
     def test_amd(self) -> None:
         hw = HardwareInfo(

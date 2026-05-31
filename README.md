@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="OpenJarvis" src="assets/OpenJarvis_Horizontal_Logo.png" width="400">
+  <img alt="open-asimov" src="assets/OpenJarvis_Horizontal_Logo.png" width="400">
 
   <p><i>Personal AI, On Personal Devices.</i></p>
 
@@ -23,21 +23,21 @@
 
 > **[Documentation](https://open-jarvis.github.io/OpenJarvis/)**
 >
-> **[Project Site](https://scalingintelligence.stanford.edu/blogs/openjarvis/)**
+> **[Project Site](https://github.com/ArmDaniel/open-asimov)**
 >
 > **[Leaderboard](https://open-jarvis.github.io/OpenJarvis/leaderboard/)**
 >
 > **[Roadmap](https://open-jarvis.github.io/OpenJarvis/development/roadmap/)**
 
-## Why OpenJarvis?
+## Why open-asimov?
 
 Personal AI agents are exploding in popularity, but nearly all of them still route intelligence through cloud APIs. Your "personal" AI continues to depend on someone else's server. At the same time, our [Intelligence Per Watt](https://www.intelligence-per-watt.ai/) research showed that local language models already handle 88.7% of single-turn chat and reasoning queries, with intelligence efficiency improving 5.3× from 2023 to 2025. The models and hardware are increasingly ready. What has been missing is the software stack to make local-first personal AI practical.
 
-OpenJarvis is that stack. It is a framework for local-first personal AI, built around three core ideas: shared primitives for building on-device agents; evaluations that treat energy, FLOPs, latency, and dollar cost as first-class constraints alongside accuracy; and a learning loop that improves models using local trace data. The goal is simple: make it possible to build personal AI agents that run locally by default, calling the cloud only when truly necessary. OpenJarvis aims to be both a research platform and a production foundation for local AI, in the spirit of PyTorch.
+open-asimov is that stack. It is a framework for local-first personal AI, built around three core ideas: shared primitives for building on-device agents; evaluations that treat energy, FLOPs, latency, and dollar cost as first-class constraints alongside accuracy; and a learning loop that improves models using local trace data. The goal is simple: make it possible to build personal AI agents that run locally by default, calling the cloud only when truly necessary. open-asimov aims to be both a research platform and a production foundation for local AI, in the spirit of PyTorch.
 
 ## Installation
 
-Pick your platform and run one command. Each installer handles [uv](https://docs.astral.sh/uv/), the Python venv, Ollama, and a starter model — about 3 minutes on broadband.
+Pick your platform and run one command. Each installer handles [uv](https://docs.astral.sh/uv/), the Python venv, llama.cpp, and a starter model — about 3 minutes on broadband.
 
 | Platform | One-liner |
 |---|---|
@@ -101,7 +101,7 @@ See the [Skills User Guide](https://open-jarvis.github.io/OpenJarvis/user-guide/
 
 ### Built-in Agents
 
-OpenJarvis ships with eight built-in agents across three execution modes (on-demand, scheduled, continuous):
+open-asimov ships with eight built-in agents across three execution modes (on-demand, scheduled, continuous):
 
 | Agent | Type | What it does |
 |-------|------|-------------|
@@ -143,7 +143,7 @@ Browse the [Roadmap](https://open-jarvis.github.io/OpenJarvis/development/roadma
 
 ## About
 
-OpenJarvis is part of [Intelligence Per Watt](https://www.intelligence-per-watt.ai/), a research initiative studying the intelligence efficiency of AI systems. The project is developed at [Hazy Research](https://hazyresearch.stanford.edu/) and the [Scaling Intelligence Lab](https://scalingintelligence.stanford.edu/) at [Stanford SAIL](https://ai.stanford.edu/).
+open-asimov is part of [Intelligence Per Watt](https://www.intelligence-per-watt.ai/), a research initiative studying the intelligence efficiency of AI systems. The project is developed at [Hazy Research](https://hazyresearch.stanford.edu/) and the [Scaling Intelligence Lab](https://scalingintelligence.stanford.edu/) at [Stanford SAIL](https://ai.stanford.edu/).
 
 ## Sponsors
 

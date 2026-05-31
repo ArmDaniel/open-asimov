@@ -56,21 +56,17 @@ def _run_research(
     from openjarvis.connectors.embeddings import OllamaEmbedder
     from openjarvis.connectors.hybrid_search import HybridSearch
     from openjarvis.connectors.store import KnowledgeStore
-    from openjarvis.engine.ollama import OllamaEngine
+    from openjarvis.engine.openai_compat_engines import LlamaCppEngine
 
     store_kwargs: dict = {}
     if knowledge_db:
         store_kwargs["db_path"] = knowledge_db
     store = KnowledgeStore(**store_kwargs)
 
-    # Research mode is wired specifically to Ollama: the planner prompt
-    # (gemma4:31b) and the function-call schema for search/clarify both
-    # assume Ollama's /api/chat tool semantics. Using the engine returned
-    # by get_engine() here is a foot-gun — discovery can pick any
-    # OpenAI-compatible engine registered on the same port as our own
-    # API server. research_router.py hardcodes OllamaEngine() for the
-    # same reason; mirror that here so CLI and HTTP behave identically.
-    engine = OllamaEngine()
+    # Research mode should use a direct local llama.cpp engine instance
+    # instead of the wrapped discovery result so CLI and HTTP research stay
+    # aligned even when the main server engine chain is instrumented.
+    engine = LlamaCppEngine()
 
     chunk_count = store._conn.execute(
         "SELECT COUNT(*) FROM knowledge_chunks"
@@ -209,7 +205,7 @@ def _run_research(
         src_word = "source" if len(cited) == 1 else "sources"
         # Report the model and engine that actually served the query rather
         # than hardcoding: planner_model is the resolved model passed to the
-        # agent, and engine_id is the backend's own identifier ("ollama").
+        # agent, and engine_id is the backend's own identifier ("llamacpp").
         engine_label = getattr(engine, "engine_id", type(engine).__name__)
         trace.print()
         trace.print(
@@ -673,13 +669,13 @@ def ask(
         console.print(
             "[red bold]No inference engine available.[/red bold]\n\n"
             "Make sure an engine is running:\n"
-            "  [cyan]ollama serve[/cyan]          — start Ollama\n"
+            "  [cyan]llama-server -m <gguf>[/cyan] — start llama.cpp\n"
             "  [cyan]vllm serve <model>[/cyan]    — start vLLM\n"
             "  [cyan]llama-server -m <gguf>[/cyan] — start llama.cpp\n\n"
             "Or set OPENAI_API_KEY / ANTHROPIC_API_KEY for cloud inference.\n\n"
             "[dim]To use a remote engine:[/dim]\n"
-            "  [cyan]jarvis config set engine.ollama.host http://<remote-ip>:11434[/cyan]\n"
-            "  [dim]or[/dim] [cyan]export OLLAMA_HOST=http://<remote-ip>:11434[/cyan]"
+            "  [cyan]jarvis config set engine.llamacpp.host http://<remote-ip>:8080[/cyan]\n"
+            "  [dim]or[/dim] [cyan]export LLAMACPP_HOST=http://<remote-ip>:8080[/cyan]"
         )
         sys.exit(1)
 

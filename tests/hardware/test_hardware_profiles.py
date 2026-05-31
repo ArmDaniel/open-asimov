@@ -116,7 +116,7 @@ class TestRecommendEngine:
         assert recommend_engine(hardware_nvidia) == "vllm"
 
     def test_nvidia_consumer_ollama(self, hardware_nvidia_consumer):
-        assert recommend_engine(hardware_nvidia_consumer) == "ollama"
+        assert recommend_engine(hardware_nvidia_consumer) == "llamacpp"
 
     def test_amd_vllm(self, hardware_amd):
         assert recommend_engine(hardware_amd) == "vllm"

@@ -221,7 +221,7 @@ def pull(model_name: str, engine: str | None) -> None:
     """Download a model."""
     console = Console()
     config = load_config()
-    engine = engine or config.engine.default or "ollama"
+    engine = engine or config.engine.default or "llamacpp"
 
     if engine == "ollama":
         host = (
